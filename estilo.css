@@ -1,0 +1,90 @@
+body {
+  background: linear-gradient(to bottom, #87ceeb, #f0f8ff);
+  font-family: sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.container {
+  text-align: center;
+}
+
+.roda {
+  border: 8px solid #333;
+  border-radius: 50%;
+  position: relative;
+  height: 50vmin;
+  width: 50vmin;
+  max-width: 500px;
+  max-height: 500px;
+  animation: roda 10s linear infinite;
+  box-shadow: 0 0 20px rgba(0,0,0,0.4);
+  margin: 20px auto;
+}
+
+.linha {
+  background-color: #333;
+  width: 50%;
+  height: 4px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform-origin: 0% 0%;
+}
+
+.linha:nth-of-type(2) { transform: rotate(60deg); }
+.linha:nth-of-type(3) { transform: rotate(120deg); }
+.linha:nth-of-type(4) { transform: rotate(180deg); }
+.linha:nth-of-type(5) { transform: rotate(240deg); }
+.linha:nth-of-type(6) { transform: rotate(300deg); }
+
+.cabine {
+  background-color: red;
+  width: 15%;
+  height: 15%;
+  position: absolute;
+  border: 3px solid #000;
+  border-radius: 10px;
+  transform-origin: 50% 0%;
+  animation: cabines 10s ease-in-out infinite;
+}
+
+.cabine:nth-of-type(1) { right: -8.5%; top: 50%; }
+.cabine:nth-of-type(2) { right: 17%; top: 93.5%; }
+.cabine:nth-of-type(3) { right: 67%; top: 93.5%; }
+.cabine:nth-of-type(4) { left: -8.5%; top: 50%; }
+.cabine:nth-of-type(5) { left: 17%; top: 7%; }
+.cabine:nth-of-type(6) { right: 17%; top: 7%; }
+
+.controles {
+  margin-top: 20px;
+}
+
+button {
+  margin: 5px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  background-color: #333;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #555;
+}
+
+@keyframes roda {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes cabines {
+  0%, 100% { transform: rotate(0deg); }
+  25%, 75% { background-color: yellow; }
+  50% { background-color: purple; }
+}
