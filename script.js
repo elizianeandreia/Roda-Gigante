@@ -22,6 +22,8 @@ var recorde = parseInt(localStorage.getItem('rescue_ride_record') || '0');
 var escudoAtivo = false;
 var somAtivo = true;
 
+var isMobile = window.innerWidth < 768;
+
 var roda = document.getElementById('roda');
 var container = document.getElementById('game-container');
 var elPontos = document.getElementById('pontos');
@@ -105,7 +107,8 @@ function distribuirPersonagens() {
 }
 
 function criarParticulas(x, y, cor) {
-  for (var i = 0; i < 12; i++) {
+  if (isMobile) return;
+  for (var i = 0; i < 8; i++) {
     var p = document.createElement('div');
     p.className = 'particle ' + cor;
     p.style.left = x + 'px'; p.style.top = y + 'px';
