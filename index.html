@@ -3,32 +3,36 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Rescue Ride 🎡</title>
+  <title>Rescue Ride</title>
   <link rel="stylesheet" href="estilo.css" />
 </head>
 <body>
-  <div class="container">
+  <div class="container" id="game-container">
     <div class="hud">
       <div class="hud-item">
-        <span class="hud-label">🏆 Pontos</span>
+        <span class="hud-label">Pontos</span>
         <span class="hud-value" id="pontos">0</span>
       </div>
       <div class="hud-item">
-        <span class="hud-label">❤️ Vidas</span>
+        <span class="hud-label">Recorde</span>
+        <span class="hud-value" id="recorde" style="color: #cbd5e0; text-shadow: none;">0</span>
+      </div>
+      <div class="hud-item">
+        <span class="hud-label">Vidas</span>
         <span class="hud-value" id="vidas">3</span>
       </div>
       <div class="hud-item">
-        <span class="hud-label">⚡ Nível</span>
+        <span class="hud-label">Nível</span>
         <span class="hud-value" id="nivel">1</span>
       </div>
       <div class="hud-item">
-        <span class="hud-label">🎯 Resgatados</span>
-        <span class="hud-value" id="resgatados">0</span>
+        <span class="hud-label">Combo</span>
+        <span class="hud-value" id="combo">x1</span>
       </div>
     </div>
 
-    <h1 class="titulo">🎡 Rescue Ride</h1>
-    <p class="subtitulo">Resgate os heróis! Cuidado com os vilões! 👾</p>
+    <h1 class="titulo">Rescue Ride</h1>
+    <p class="subtitulo">Resgate os heróis. Cuidado com os vilões.</p>
 
     <div class="timer-bar-container" id="timerContainer" style="display:none;">
       <div class="timer-bar" id="timerBar"></div>
@@ -46,38 +50,69 @@
     </div>
 
     <div class="controles">
-      <button id="iniciar">▶️ Iniciar</button>
-      <button id="pausar">⏸️ Pausar</button>
-      <button id="reiniciar">🔄 Reiniciar</button>
+      <button id="iniciar">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        Iniciar
+      </button>
+      <button id="pausar">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+        Pausar
+      </button>
+      <button id="reiniciar">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/></svg>
+        Reiniciar
+      </button>
+      <button id="toggle-som" class="icon-only">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+      </button>
     </div>
 
     <div class="instrucoes">
-      <p>🦸 Clique nos <strong>heróis</strong> para resgatar (+10 pts)</p>
-      <p>👾 Evite clicar nos <strong>vilões</strong> (-1 vida)</p>
-      <p>⏰ Resgate antes que a rodada acabe!</p>
+      <p><span class="icon-dot heroi-dot"></span> Clique nos <strong>heróis</strong> para resgatar (+10 pts × combo)</p>
+      <p><span class="icon-dot vilao-dot"></span> Evite clicar nos <strong>vilões</strong> (-1 vida, reseta combo)</p>
+      <p>Resgate todos antes que o tempo acabe.</p>
     </div>
   </div>
 
-  <div class="modal-overlay" id="modalGameOver">
+  <div class="modal-overlay oculto" id="modalPausa">
     <div class="modal">
-      <h2>💥 Game Over!</h2>
+      <h2>Pausado</h2>
+      <p class="modal-stats">O jogo está pausado.</p>
+      <button id="btnDespausar">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        Continuar
+      </button>
+    </div>
+  </div>
+
+  <div class="modal-overlay oculto" id="modalGameOver">
+    <div class="modal">
+      <h2>Fim de Jogo</h2>
       <p class="modal-stats">
-        Pontuação final: <strong id="finalPontos">0</strong><br>
-        Heróis resgatados: <strong id="finalResgatados">0</strong><br>
-        Nível alcançado: <strong id="finalNivel">1</strong>
+        Pontuação: <strong id="finalPontos">0</strong><br>
+        Recorde: <strong id="finalRecorde">0</strong><br>
+        Nível: <strong id="finalNivel">1</strong>
       </p>
-      <button id="jogarNovamente">🔄 Jogar Novamente</button>
+      <button id="jogarNovamente">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2v6h-6M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/></svg>
+        Jogar Novamente
+      </button>
     </div>
   </div>
 
   <div class="modal-overlay" id="modalInicio">
     <div class="modal">
-      <h2>🎡 Rescue Ride</h2>
-      <p class="modal-stats">
-        Resgate todos os heróis das cabines!<br>
-        Cuidado: vilões estão espalhados pela roda 👾
-      </p>
-      <button id="comecarJogo">🚀 Começar</button>
+      <h2>Rescue Ride</h2>
+      <p class="modal-stats">Escolha a dificuldade:</p>
+      <div class="difficulty-buttons">
+        <button data-diff="facil" class="diff-btn">Fácil</button>
+        <button data-diff="normal" class="diff-btn active">Normal</button>
+        <button data-diff="dificil" class="diff-btn">Difícil</button>
+      </div>
+      <button id="comecarJogo" style="margin-top: 20px; width: 100%;">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        Começar
+      </button>
     </div>
   </div>
 
