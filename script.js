@@ -18,10 +18,11 @@ var cabinesData = [];
 var pontos = 0, vidas = 3, nivel = 1, resgatados = 0, combo = 1;
 var jogando = false, pausado = false, rodadaTimer = null;
 var tempoRestante = 0, duracaoRodada = 8000;
-var recorde = parseInt(localStorage.getItem('rescue_ride_record') || '0');
+var recorde = 0;
+try { recorde = parseInt(localStorage.getItem('rescue_ride_record') || '0', 10) || 0; } catch (e) {}
 var escudoAtivo = false;
 var somAtivo = true;
-var isMobile = window.innerWidth < 768;
+var isMobile = window.innerWidth < 768 || window.matchMedia('(pointer: coarse)').matches;
 
 var roda = document.getElementById('roda');
 var container = document.getElementById('game-container');
@@ -43,6 +44,7 @@ var notasMusica = [261.63, 329.63, 392.00, 523.25, 392.00, 329.63, 261.63, 196.0
 
 function getAudioCtx() {
   if (!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+  if (audioCtx.state === 'suspended') { audioCtx.resume(); }
   return audioCtx;
 }
 
@@ -76,6 +78,9 @@ function pararMusicaFundo() {
 }
 
 function criarCabines() {
+  roda.style.animation = 'none';
+  void roda.offsetWidth;
+  roda.style.animation = '';
   var existentes = roda.querySelectorAll('.cabine');
   for (var i = 0; i < existentes.length; i++) { existentes[i].remove(); }
   cabinesData = [];
@@ -90,7 +95,7 @@ function criarCabines() {
       cabine.className = 'cabine';
       cabine.dataset.index = String(index);
       Object.keys(pos).forEach(function(prop) { cabine.style[prop] = pos[prop]; });
-      cabine.addEventListener('click', function() { handleCliqueCabine(index); });
+      cabine.addEventListener('pointerdown', function(e) { e.preventDefault(); handleCliqueCabine(index); });
       roda.appendChild(cabine);
       cabinesData.push({ elemento: cabine, tipo: null, resgatada: false });
     })(i);
@@ -175,19 +180,19 @@ function handleCliqueCabine(index) {
     if (combo === 5) container.classList.add('combo-max');
     cabine.resgatada = true;
     cabine.elemento.classList.add('resgatada');
-    mostrarFeedback(cabine.elemento, '+' + bonus, 'positivo');
+    mostrarFeedback(cabine.elemento, '+' + bonus, 'positivo', rect);
     criarParticulas(cx, cy, 'verde');
     tocarSom('acerto');
   } else if (cabine.tipo === 'vilao') {
     if (escudoAtivo) {
       escudoAtivo = false;
-      mostrarFeedback(cabine.elemento, 'Escudo!', 'positivo');
+      mostrarFeedback(cabine.elemento, 'Escudo!', 'positivo', rect);
       tocarSom('acerto');
     } else {
       vidas--; combo = 1; container.classList.remove('combo-max');
       cabine.elemento.classList.add('errada');
       (function(el) { setTimeout(function() { el.classList.remove('errada'); }, 400); })(cabine.elemento);
-      mostrarFeedback(cabine.elemento, '-1', 'negativo');
+      mostrarFeedback(cabine.elemento, '-1', 'negativo', rect);
       criarParticulas(cx, cy, 'vermelha');
       tocarSom('erro');
       if (navigator.vibrate) navigator.vibrate(100);
@@ -202,11 +207,11 @@ function handleCliqueCabine(index) {
   atualizarHUD(); verificarFimRodada();
 }
 
-function mostrarFeedback(elemento, texto, tipo) {
+function mostrarFeedback(elemento, texto, tipo, rectPronto) {
   var feedback = document.createElement('div');
   feedback.className = 'feedback ' + tipo;
   feedback.textContent = texto;
-  var rect = elemento.getBoundingClientRect();
+  var rect = rectPronto || elemento.getBoundingClientRect();
   feedback.style.left = (rect.left + rect.width / 2) + 'px';
   feedback.style.top = rect.top + 'px';
   document.body.appendChild(feedback);
@@ -243,14 +248,14 @@ function iniciarTimerRodada() {
   if (rodadaTimer) clearInterval(rodadaTimer);
   tempoRestante = duracaoRodada; 
   timerContainer.style.display = 'block'; 
-  timerBar.style.width = '100%';
+  timerBar.style.transform = 'scaleX(1)';
   timerBar.classList.remove('warning');
   
   rodadaTimer = setInterval(function() {
     if (pausado) return;
     tempoRestante -= 100;
-    var pct = Math.max(0, (tempoRestante / duracaoRodada) * 100);
-    timerBar.style.width = pct + '%';
+    var pct = Math.min(100, Math.max(0, (tempoRestante / duracaoRodada) * 100));
+    timerBar.style.transform = 'scaleX(' + (pct / 100) + ')';
     
     if (pct <= 25) timerBar.classList.add('warning');
     else timerBar.classList.remove('warning');
@@ -320,7 +325,7 @@ function gameOver() {
   
   if (pontos > recorde) {
     recorde = pontos;
-    localStorage.setItem('rescue_ride_record', recorde);
+    try { localStorage.setItem('rescue_ride_record', recorde); } catch (e) {}
   }
   
   document.getElementById('finalPontos').textContent = String(pontos);
@@ -344,9 +349,8 @@ function reiniciarJogo() {
   pontos = 0; vidas = config[dificuldade].vidas; nivel = 1; resgatados = 0; combo = 1; 
   duracaoRodada = config[dificuldade].tempo;
   escudoAtivo = false;
-  atualizarVelocidadeRoda(); atualizarHUD();
   modalGameOver.classList.add('oculto'); modalInicio.classList.add('oculto'); modalPausa.classList.add('oculto');
-  criarCabines(); iniciarJogo();
+  criarCabines(); atualizarVelocidadeRoda(); atualizarHUD(); iniciarJogo();
 }
 
 function tocarSom(tipo) {
@@ -416,6 +420,10 @@ document.addEventListener('keydown', function(e) {
   if (e.key === 'r' || e.key === 'R') {
     if (jogando) reiniciarJogo();
   }
+});
+
+document.addEventListener('visibilitychange', function() {
+  if (document.hidden) { pausarJogo(); }
 });
 
 criarCabines();
