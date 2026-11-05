@@ -21,7 +21,6 @@ var tempoRestante = 0, duracaoRodada = 8000;
 var recorde = parseInt(localStorage.getItem('rescue_ride_record') || '0');
 var escudoAtivo = false;
 var somAtivo = true;
-
 var isMobile = window.innerWidth < 768;
 
 var roda = document.getElementById('roda');
@@ -36,6 +35,45 @@ var timerBar = document.getElementById('timerBar');
 var modalInicio = document.getElementById('modalInicio');
 var modalGameOver = document.getElementById('modalGameOver');
 var modalPausa = document.getElementById('modalPausa');
+
+var audioCtx = null;
+var musicaTimer = null;
+var musicaIndex = 0;
+var notasMusica = [261.63, 329.63, 392.00, 523.25, 392.00, 329.63, 261.63, 196.00, 261.63, 329.63, 392.00, 523.25, 659.25, 523.25, 392.00, 329.63];
+
+function getAudioCtx() {
+  if (!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+  return audioCtx;
+}
+
+function iniciarMusicaFundo() {
+  if (!somAtivo) return;
+  pararMusicaFundo();
+  var ctx = getAudioCtx();
+  musicaIndex = 0;
+  
+  function tocarProximaNota() {
+    if (!jogando || pausado || !somAtivo) return;
+    var freq = notasMusica[musicaIndex];
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.value = freq;
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    gain.gain.setValueAtTime(0.05, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.25);
+    musicaIndex = (musicaIndex + 1) % notasMusica.length;
+    musicaTimer = setTimeout(tocarProximaNota, 300);
+  }
+  tocarProximaNota();
+}
+
+function pararMusicaFundo() {
+  if (musicaTimer) clearTimeout(musicaTimer);
+}
 
 function criarCabines() {
   var existentes = roda.querySelectorAll('.cabine');
@@ -259,6 +297,7 @@ function pausarJogo() {
   pausado = true;
   roda.classList.remove('jogando');
   modalPausa.classList.remove('oculto');
+  pararMusicaFundo();
 }
 
 function despausarJogo() {
@@ -267,11 +306,13 @@ function despausarJogo() {
   if (!jogando) return; 
   roda.classList.add('jogando');
   modalPausa.classList.add('oculto');
+  iniciarMusicaFundo();
 }
 
 function gameOver() {
   jogando = false; pausado = false;
   if (rodadaTimer) clearInterval(rodadaTimer);
+  pararMusicaFundo();
   roda.classList.remove('jogando'); 
   container.classList.remove('combo-max');
   timerContainer.style.display = 'none';
@@ -296,6 +337,7 @@ function iniciarJogo() {
   distribuirPersonagens(); 
   iniciarTimerRodada(); 
   atualizarHUD();
+  iniciarMusicaFundo();
 }
 
 function reiniciarJogo() {
@@ -305,12 +347,6 @@ function reiniciarJogo() {
   atualizarVelocidadeRoda(); atualizarHUD();
   modalGameOver.classList.add('oculto'); modalInicio.classList.add('oculto'); modalPausa.classList.add('oculto');
   criarCabines(); iniciarJogo();
-}
-
-var audioCtx = null;
-function getAudioCtx() {
-  if (!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
-  return audioCtx;
 }
 
 function tocarSom(tipo) {
@@ -365,6 +401,11 @@ document.getElementById('comecarJogo').addEventListener('click', function() {
 document.getElementById('toggle-som').addEventListener('click', function() {
   somAtivo = !somAtivo;
   this.style.opacity = somAtivo ? '1' : '0.4';
+  if (somAtivo && jogando && !pausado) {
+    iniciarMusicaFundo();
+  } else {
+    pararMusicaFundo();
+  }
 });
 
 document.addEventListener('keydown', function(e) {
