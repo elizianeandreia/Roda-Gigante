@@ -1,35 +1,86 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>Roda Gigante Interativa</title>
-  <link rel="stylesheet" href="./estilo.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rescue Ride 🎡</title>
+  <link rel="stylesheet" href="estilo.css" />
 </head>
 <body>
   <div class="container">
-    <div class="roda" id="roda">
-      <span class="linha"></span>
-      <span class="linha"></span>
-      <span class="linha"></span>
-      <span class="linha"></span>
-      <span class="linha"></span>
-      <span class="linha"></span>
+    <div class="hud">
+      <div class="hud-item">
+        <span class="hud-label">🏆 Pontos</span>
+        <span class="hud-value" id="pontos">0</span>
+      </div>
+      <div class="hud-item">
+        <span class="hud-label">❤️ Vidas</span>
+        <span class="hud-value" id="vidas">3</span>
+      </div>
+      <div class="hud-item">
+        <span class="hud-label">⚡ Nível</span>
+        <span class="hud-value" id="nivel">1</span>
+      </div>
+      <div class="hud-item">
+        <span class="hud-label">🎯 Resgatados</span>
+        <span class="hud-value" id="resgatados">0</span>
+      </div>
+    </div>
 
-      <div class="cabine"></div>
-      <div class="cabine"></div>
-      <div class="cabine"></div>
-      <div class="cabine"></div>
-      <div class="cabine"></div>
-      <div class="cabine"></div>
+    <h1 class="titulo">🎡 Rescue Ride</h1>
+    <p class="subtitulo">Resgate os heróis! Cuidado com os vilões! 👾</p>
+
+    <div class="timer-bar-container" id="timerContainer" style="display:none;">
+      <div class="timer-bar" id="timerBar"></div>
+    </div>
+
+    <div class="area-roda">
+      <div class="roda" id="roda">
+        <div class="linha"></div>
+        <div class="linha"></div>
+        <div class="linha"></div>
+        <div class="linha"></div>
+        <div class="linha"></div>
+        <div class="linha"></div>
+      </div>
     </div>
 
     <div class="controles">
-      <button id="iniciar">Iniciar</button>
-      <button id="pausar">Pausar</button>
-      <button id="trocarCores">Trocar Cores</button>
+      <button id="iniciar">▶️ Iniciar</button>
+      <button id="pausar">⏸️ Pausar</button>
+      <button id="reiniciar">🔄 Reiniciar</button>
+    </div>
+
+    <div class="instrucoes">
+      <p>🦸 Clique nos <strong>heróis</strong> para resgatar (+10 pts)</p>
+      <p>👾 Evite clicar nos <strong>vilões</strong> (-1 vida)</p>
+      <p>⏰ Resgate antes que a rodada acabe!</p>
     </div>
   </div>
 
-  <script src="./script.js" defer></script>
+  <div class="modal-overlay" id="modalGameOver">
+    <div class="modal">
+      <h2>💥 Game Over!</h2>
+      <p class="modal-stats">
+        Pontuação final: <strong id="finalPontos">0</strong><br>
+        Heróis resgatados: <strong id="finalResgatados">0</strong><br>
+        Nível alcançado: <strong id="finalNivel">1</strong>
+      </p>
+      <button id="jogarNovamente">🔄 Jogar Novamente</button>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modalInicio">
+    <div class="modal">
+      <h2>🎡 Rescue Ride</h2>
+      <p class="modal-stats">
+        Resgate todos os heróis das cabines!<br>
+        Cuidado: vilões estão espalhados pela roda 👾
+      </p>
+      <button id="comecarJogo">🚀 Começar</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>
